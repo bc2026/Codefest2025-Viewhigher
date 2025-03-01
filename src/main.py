@@ -9,9 +9,9 @@ app.config.from_object(Config)
 def hello():
     return send_file("../frontend/index.html")
 
-@app.route('/read-resume')
-def read_resume():
-    return "Reading the resume"
+# @app.route('/read-resume')
+# def read_resume():
+#     return "Reading the resume"
 
 if __name__ == '__main__':
     app.run(debug=True)
