@@ -6,7 +6,7 @@ client = OpenAI(api_key=api_key)
 
 
 file  =  client.files.create(
-    file=open("./*.pdf", 'rb'),
+    file=open("./test.pdf", 'rb'),
     purpose="assistants"
 )
 
