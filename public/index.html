@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ViewHigher - AI-Powered Job Search</title>
 
-    <!-- Bootstrap CSS for styling -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Font for a professional look -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Apply the background image */
         body {
             background: url('assets/background.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Arial', sans-serif;
         }
-        
-        /* Form container styling */
+
         .container {
             max-width: 650px;
             margin-top: 40px;
@@ -27,27 +24,37 @@
             border-radius: 10px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
+            text-align: center;
         }
 
-        /* Mission statement box with premium styling */
+        /* Logo Styling */
+        .logo {
+            width: 220px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        /* Updated Mission Statement Styling */
         .mission-box {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+            background: 
+            #e7f1f7; /* Matches Find Jobs button */
+            color: black;
             padding: 25px;
             border-radius: 10px;
             text-align: center;
-            font-family: 'Merriweather', serif;
             font-size: 18px;
-            font-weight: 400;
+            font-weight: bold;
             line-height: 1.6;
             margin-bottom: 25px;
             box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.15);
         }
 
-        .mission-box h3 {
-            font-weight: 700;
+        /* Updated "Find Your Dream Job" to match Find Jobs button */
+        .main-heading {
+            color: #0056b3; /* Same as Find Jobs button */
+            font-weight: bold;
             font-size: 24px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .form-select, .form-control {
@@ -59,7 +66,6 @@
             font-weight: bold;
         }
 
-        /* Button styling */
         .btn-primary {
             background-color: #0056b3;
             border: none;
@@ -72,7 +78,6 @@
             background-color: #003d80;
         }
 
-        /* Footer */
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -85,14 +90,18 @@
 <body>
 
     <div class="container">
-        <!-- Mission Statement -->
+        <!-- Logo -->
+        <img src="assets/vhlogo.png" alt="ViewHigher Logo" class="logo">
+
+        <!-- Updated Mission Statement -->
         <div class="mission-box">
-            <h3>Welcome to ViewHigher</h3>
+            <h3>Welcome to ViewHigher!</h3>
             <p>At ViewHigher, we leverage the power of AI to analyze your resume and match you with job opportunities that align with your skills and experience.  
-            Our mission is to connect talented individuals with the right careers, ensuring a perfect fit between **your potential and the industry’s needs**.</p>
+            Our mission is to connect talented individuals with the right careers, ensuring a perfect fit between your potential and the industry’s needs.</p>
         </div>
 
-        <h2 class="text-center text-primary">Find Your Dream Job</h2>
+        <!-- Updated "Find Your Dream Job" -->
+        <h2 class="main-heading">Find Your Dream Job</h2>
         
         <!-- Job Type Dropdown -->
         <label for="jobType" class="form-label mt-3">What job type are you looking for?</label>
@@ -108,6 +117,10 @@
             <option value="HR Manager">HR Manager</option>
         </select>
 
+        <!-- City, State Input -->
+        <label for="cityState" class="form-label">Preferred City, State</label>
+        <input type="text" class="form-control" id="cityState" placeholder="e.g., New York, NY">
+
         <!-- Resume Upload -->
         <label for="resumeUpload" class="form-label">Attach Your Resume</label>
         <input type="file" class="form-control" id="resumeUpload" accept=".pdf, .doc, .docx">
@@ -119,32 +132,36 @@
         <!-- Response Message -->
         <p id="responseMessage" class="mt-3 text-center"></p>
 
-        <!-- Footer -->
         <div class="footer">
             <p>&copy; 2025 ViewHigher. All Rights Reserved.</p>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
         let selectedJobType = "";
+        let selectedCityState = "";
         let uploadedResume = null;
 
-        // Update selected job type
         document.getElementById("jobType").addEventListener("change", function() {
             selectedJobType = this.value;
         });
 
-        // Handle resume upload
+        document.getElementById("cityState").addEventListener("input", function() {
+            selectedCityState = this.value;
+        });
+
         document.getElementById("resumeUpload").addEventListener("change", function(event) {
             uploadedResume = event.target.files[0];
             document.getElementById("resume-label").textContent = uploadedResume ? uploadedResume.name : "No file chosen";
         });
 
-        // Send data to Flask backend
         function submitForm() {
             if (!selectedJobType) {
                 alert("Please select a job type.");
+                return;
+            }
+            if (!selectedCityState) {
+                alert("Please enter a city and state.");
                 return;
             }
             if (!uploadedResume) {
@@ -152,8 +169,11 @@
                 return;
             }
 
+            console.log("🔵 Sending jobType:", selectedJobType, "City, State:", selectedCityState);  // Debugging output
+
             const formData = new FormData();
             formData.append("jobType", selectedJobType);
+            formData.append("cityState", selectedCityState);
             formData.append("resume", uploadedResume);
 
             fetch("http://127.0.0.1:5000/upload-resume", {
@@ -164,10 +184,11 @@
             .then(data => {
                 document.getElementById("responseMessage").textContent = "✅ " + data.message;
                 console.log("Job Type:", data.jobType);
+                console.log("City, State:", data.cityState);
                 console.log("Resume Filename:", data.resumeFile);
             })
             .catch(error => {
-                console.error("Error:", error);
+                console.error("🔴 Error:", error);
                 document.getElementById("responseMessage").textContent = "❌ Error submitting data.";
             });
         }
