@@ -1,0 +1,96 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+# GitHub authentication token (replace with your actual token)
+GITHUB_TOKEN = "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"  # Get this from GitHub Developer Settings
+
+# Subreddits categorized by job title
+SUBREDDITS = {
+    "software engineer": ["cscareerquestions", "leetcode", "learnprogramming"],
+    "data scientist": ["datascience", "MachineLearning", "analytics"],
+    "finance analyst": ["finance", "FinancialCareers", "Accounting"],
+    "mechanical engineer": ["engineering", "MechanicalEngineering"],
+    "general": ["interviews", "jobs", "career_guidance"]
+}
+
+def get_subreddits(job_title):
+    """Return relevant subreddits based on job title"""
+    for key in SUBREDDITS:
+        if key in job_title.lower():
+            return SUBREDDITS[key]
+    return ["interviews", "jobs"]  # Default if no match
+
+def scrape_reddit_interview_questions(job_title):
+    """Scrape Reddit using JSON API for interview questions"""
+    subreddits = get_subreddits(job_title)
+    interview_questions = []
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+
+    for subreddit in subreddits:
+        search_url = f"https://www.reddit.com/r/{subreddit}/search.json?q={job_title}+interview&restrict_sr=1"
+        response = requests.get(search_url, headers=headers)
+        
+        if response.status_code != 200:
+            print(f"Reddit request failed: {response.status_code}")
+            continue
+        
+        data = response.json()
+        posts = data.get("data", {}).get("children", [])
+
+        for post in posts[:5]:  # Get top 5 posts
+            question_text = post["data"].get("title", "No Title Found")
+            interview_questions.append({"Subreddit": subreddit, "Question": question_text})
+    
+    return interview_questions
+
+def get_github_alumni(college_name, industry):
+    """Search GitHub for users mentioning college + industry in profile"""
+    url = f"https://api.github.com/search/users?q={college_name}+{industry}+alumni+education+in:bio&per_page=50"
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": f"token {GITHUB_TOKEN}"  # Use authentication for more results
+    }
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        users = response.json().get("items", [])
+        return [{"Username": user["login"], "Profile": user["html_url"]} for user in users]
+    
+    print(f"GitHub API request failed: {response.status_code}")
+    return []
+
+def find_resources(job_title, college, industry):
+    """Retrieve interview questions, alumni networks, and useful links"""
+    if not job_title or not college or not industry:
+        return {"error": "Missing required fields (job_title, college, industry)"}
+
+    # Get Reddit interview questions
+    interview_questions = scrape_reddit_interview_questions(job_title)
+    
+    # Get alumni data
+    github_alumni = get_github_alumni(college, industry)
+
+    # Useful career links
+    career_links = [
+        {"Title": "Glassdoor Interview Questions", "URL": "https://www.glassdoor.com/Interview/index.htm"},
+        {"Title": "LeetCode Practice Questions", "URL": "https://leetcode.com/"},
+        {"Title": "Indeed Job Search", "URL": "https://www.indeed.com/"},
+    ]
+
+    return {
+        "interview_questions": interview_questions,
+        "alumni_networks": {
+            "github": github_alumni
+        },
+        "career_links": career_links
+    }
+
+# Example usage
+job_title = "Finance Analyst"
+college = "Harvard"
+industry = "Stock Market"
+resources = find_resources(job_title, college, industry)
+print(resources)
