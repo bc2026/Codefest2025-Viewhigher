@@ -7,7 +7,7 @@ app.config.from_object(Config)
 
 @app.route('/')
 def hello():
-    return send_file("../frontend/index.html")
+    return send_file("../public/index.html")
 
 # @app.route('/read-resume')
 # def read_resume():
