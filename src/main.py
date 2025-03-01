@@ -1,6 +1,6 @@
 from flask import Flask, send_file
 from config import Config
-import resume_parser
+# import resume_parser
 
 app = Flask(__name__)
 app.config.from_object(Config)
