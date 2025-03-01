@@ -1,12 +1,13 @@
 from flask import Flask, send_file
 from config import Config
+from resume_parser
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 @app.route('/')
 def hello():
-    return send_file("index.html")
+    return send_file("../frontend/index.html")
 
 @app.route('/read-resume')
 def read_resume():

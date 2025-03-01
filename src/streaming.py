@@ -1,6 +1,7 @@
 from typing_extensions import override
 from openai import AssistantEventHandler
-import resume_parser
+from  resume_parser import client,thread,assistant
+
 # First, we create a EventHandler class to define
 # how we want to handle the events in the response stream.
  
